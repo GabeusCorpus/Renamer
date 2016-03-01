@@ -33,7 +33,7 @@ namespace Renamer
 
             if (fbd.ShowDialog() == DialogResult.OK) {
                 sSourceFolder.Text = fbd.SelectedPath;
-                }
+            }
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -44,8 +44,8 @@ namespace Renamer
             fbd.ShowNewFolderButton = true;
 
             if (fbd.ShowDialog() == DialogResult.OK) {
-                sDestFolder.Text = fbd.SelectedPath;    
-                }
+                sDestFolder.Text = fbd.SelectedPath;
+            }
         }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace Renamer
         /// <param name="e"></param>
         private void button4_Click(object sender, EventArgs e)
         {
-          
+
             OpenFileDialog fd = new OpenFileDialog();
             //FolderBrowserDialog fbd = new FolderBrowserDialog();
             fd.InitialDirectory = Environment.SpecialFolder.Desktop.ToString();
@@ -68,19 +68,17 @@ namespace Renamer
                 FileStream stream = File.Open(fd.FileName, FileMode.Open, FileAccess.Read);
                 sExcelFile.Text = Path.GetExtension(fd.FileName);
                 if (Path.GetExtension(fd.FileName) == ".xls") {
+                    //TODO: Move this to a public scope. 
                     IExcelDataReader excelReader = ExcelReaderFactory.CreateBinaryReader(stream);
                     Console.Write("Data Read OK");
-                    //TODO: figure out the best way to read the column titles into the combo box
                     excelReader.IsFirstRowAsColumnNames = true;
                     DataSet result = excelReader.AsDataSet();
                     string[] columnNamesFrom = result.Tables[0].Columns.Cast<DataColumn>().Select(x => x.ColumnName).ToArray();
                     string[] columnNamesTo = result.Tables[0].Columns.Cast<DataColumn>().Select(x => x.ColumnName).ToArray();
                     fldLookUpVal.DataSource = columnNamesFrom;
-                  //  fldLookUpVal.DisplayMember = "Employee No";
                     fldLookupValTo.DataSource = columnNamesTo;
-                    //fldLookupValTo.DisplayMember = "SAP Pernr";
                     excelReader.Close();
-                   
+
                 }
                 else {
                     MessageBox.Show("Right now we're only supporting .XLS files because that's the datasource I needed for this project. I'll fix this later.");
@@ -98,7 +96,7 @@ namespace Renamer
         }
 
         private class SpreadsheetColumns {
-            public string Name { get; set;}
+            public string Name { get; set; }
             public SpreadsheetColumns(string _name) {
                 Name = _name;
             }
@@ -110,13 +108,19 @@ namespace Renamer
             StringBuilder sResults = new StringBuilder("");
             sResults.AppendLine("Beginning Process...");
             //TODO: Add validation, son.
-            string[] arrSrcFiles =Directory.GetFiles(sSourceFolder.Text);
+            string[] arrSrcFiles = Directory.GetFiles(sSourceFolder.Text);
             foreach (string FileName in arrSrcFiles) {
-                sResults.AppendLine(FileName);
+                sResults.AppendLine(RenameFile(FileName));
             }
 
+            //SHOW ME THE LOGINESS!!1!
             MessageBox.Show(sResults.ToString());
-            
+
+        }
+
+        private string RenameFile(string FileName)
+        {//TODO: Make this *actually* do the renaming. You will want to add the Excel file into global scope so you can get to it.
+            return FileName;
         }
     }
 
