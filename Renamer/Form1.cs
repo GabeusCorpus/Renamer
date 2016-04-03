@@ -56,7 +56,6 @@ namespace Renamer
         /// <param name="e"></param>
         private void button4_Click(object sender, EventArgs e)
         {
-
             OpenFileDialog fd = new OpenFileDialog();
             //FolderBrowserDialog fbd = new FolderBrowserDialog();
             fd.InitialDirectory = Environment.SpecialFolder.Desktop.ToString();
@@ -66,20 +65,12 @@ namespace Renamer
             if (fd.ShowDialog() == DialogResult.OK)
             {
                 sExcelFile.Text = fd.FileName;
-                FileStream stream = File.Open(fd.FileName, FileMode.Open, FileAccess.Read);
-                sExcelFile.Text = Path.GetExtension(fd.FileName);
                 if (Path.GetExtension(fd.FileName) == ".xls") {
-                    //TODO: Move this to a public scope. COnsider  http://stackoverflow.com/questions/2445436/global-variables-in-c-net
-                    IExcelDataReader excelReader = ExcelReaderFactory.CreateBinaryReader(stream);
-                    Console.Write("Data Read OK");
-                    excelReader.IsFirstRowAsColumnNames = true;
-                    DataSet result = excelReader.AsDataSet();
+                    DataSet result = ExcelData.Data(fd.FileName);
                     string[] columnNamesFrom = result.Tables[0].Columns.Cast<DataColumn>().Select(x => x.ColumnName).ToArray();
                     string[] columnNamesTo = result.Tables[0].Columns.Cast<DataColumn>().Select(x => x.ColumnName).ToArray();
                     fldLookUpVal.DataSource = columnNamesFrom;
-                    fldLookupValTo.DataSource = columnNamesTo;
-                    excelReader.Close();
-
+                    fldLookupValTo.DataSource = columnNamesTo;      
                 }
                 else {
                     MessageBox.Show("Right now we're only supporting .XLS files because that's the datasource I needed for this project. I'll fix this later.");
@@ -131,10 +122,23 @@ namespace Renamer
             if (! sDest.ToString().EndsWith(@"\")){ sDest.Append(@"\"); }
 
             ///now the tricky bit - I have to look up the new ID based on the old ID
-            Match m = Regex.Match(FileName,  @"\d{6}");
+            Regex rgx = new Regex(@regExpression.Text);
+            Match m = rgx.Match(FileName);
+            string newvalue = ExcelData.GetDestValue(fldLookUpVal.SelectedValue.ToString(), fldLookupValTo.SelectedValue.ToString(), m.ToString(), sExcelFile.Text.ToString());
+            string justfilename = Path.GetFileName(FileName);
+            string newname = rgx.Replace(justfilename, newvalue);
+            string destination = sDest.Append(newname).ToString();
 
-            sDest.Append(Path.GetFileName(FileName));
-            return sDest.ToString();
+            // I LIKE TO MOVE IT MOVE IT...
+
+            // Ensure that the target does not exist.
+            if (File.Exists(destination))
+                File.Delete(destination);
+
+            // Move the file.
+            File.Copy(FileName, destination);
+            Console.WriteLine("{0} was moved to {1}.", FileName, destination);
+            return destination;
         }
 
         private Boolean ValidateInput()
@@ -142,7 +146,27 @@ namespace Renamer
             if (sSourceFolder.TextLength < 5) { MessageBox.Show("Must specify a source directory"); return false; }
             else { return true; }
         }
+        public static class ExcelData {
+            public static void TellMe() { MessageBox.Show("I ran this!");}
+            
+            public static string GetDestValue(string srcCol, string dstCol, string lkupVal, string filename) {
 
+                DataSet columns = Data(filename);
+                //TODO: create the lookup that finds lkupVal in srcCol and returns correcponding dstCol
+                DataRow[] foundRow = columns.Tables[0].Select("["+srcCol + "]='" + lkupVal+"'");
+                return foundRow[0].Field<string>(dstCol);
+            }
+
+            public static DataSet Data(string filename) {
+                FileStream stream = File.Open(filename, FileMode.Open, FileAccess.Read);
+                IExcelDataReader excelReader = ExcelReaderFactory.CreateBinaryReader(stream);
+                Console.Write("Data Read in static OK");
+                excelReader.IsFirstRowAsColumnNames = true;
+                DataSet result = excelReader.AsDataSet();
+                excelReader.Close();
+                return result;
+            }
+        }
     }
 
 }

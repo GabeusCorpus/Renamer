@@ -59,6 +59,7 @@
             this.sSourceFolder.Name = "sSourceFolder";
             this.sSourceFolder.Size = new System.Drawing.Size(842, 31);
             this.sSourceFolder.TabIndex = 1;
+            this.sSourceFolder.Text = "C:\\Users\\Gabriel Tinnaro\\Desktop\\renamerfiles\\source";
             // 
             // button2
             // 
@@ -76,6 +77,7 @@
             this.sDestFolder.Name = "sDestFolder";
             this.sDestFolder.Size = new System.Drawing.Size(842, 31);
             this.sDestFolder.TabIndex = 3;
+            this.sDestFolder.Text = "C:\\Users\\Gabriel Tinnaro\\Desktop\\renamerfiles\\dest";
             // 
             // button4
             // 
@@ -109,6 +111,7 @@
             this.regExpression.Name = "regExpression";
             this.regExpression.Size = new System.Drawing.Size(842, 31);
             this.regExpression.TabIndex = 8;
+            this.regExpression.Text = "\\d{6}";
             // 
             // label1
             // 
