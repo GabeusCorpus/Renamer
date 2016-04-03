@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.IO;
 using System.Windows.Forms;
@@ -68,7 +69,7 @@ namespace Renamer
                 FileStream stream = File.Open(fd.FileName, FileMode.Open, FileAccess.Read);
                 sExcelFile.Text = Path.GetExtension(fd.FileName);
                 if (Path.GetExtension(fd.FileName) == ".xls") {
-                    //TODO: Move this to a public scope. 
+                    //TODO: Move this to a public scope. COnsider  http://stackoverflow.com/questions/2445436/global-variables-in-c-net
                     IExcelDataReader excelReader = ExcelReaderFactory.CreateBinaryReader(stream);
                     Console.Write("Data Read OK");
                     excelReader.IsFirstRowAsColumnNames = true;
@@ -107,7 +108,8 @@ namespace Renamer
             //put together a stringbuilder to make the logginess...
             StringBuilder sResults = new StringBuilder("");
             sResults.AppendLine("Beginning Process...");
-            //TODO: Add validation, son.
+            if (!ValidateInput()) { return; }
+
             string[] arrSrcFiles = Directory.GetFiles(sSourceFolder.Text);
             foreach (string FileName in arrSrcFiles) {
                 sResults.AppendLine(RenameFile(FileName));
@@ -120,8 +122,27 @@ namespace Renamer
 
         private string RenameFile(string FileName)
         {//TODO: Make this *actually* do the renaming. You will want to add the Excel file into global scope so you can get to it.
-            return FileName;
+            if (!File.Exists(FileName))
+            {
+                return  "No Such Thing.";
+            }
+            //setip destination path
+            StringBuilder sDest = new StringBuilder(sDestFolder.Text);
+            if (! sDest.ToString().EndsWith(@"\")){ sDest.Append(@"\"); }
+
+            ///now the tricky bit - I have to look up the new ID based on the old ID
+            Match m = Regex.Match(FileName,  @"\d{6}");
+
+            sDest.Append(Path.GetFileName(FileName));
+            return sDest.ToString();
         }
+
+        private Boolean ValidateInput()
+        { //TODO: Add validation, son.
+            if (sSourceFolder.TextLength < 5) { MessageBox.Show("Must specify a source directory"); return false; }
+            else { return true; }
+        }
+
     }
 
 }

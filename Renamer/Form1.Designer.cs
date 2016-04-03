@@ -152,7 +152,7 @@
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(305, 52);
             this.button3.TabIndex = 13;
-            this.button3.Text = "Run, Blinky, Run.";
+            this.button3.Text = "Run, Binky, Run.";
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
